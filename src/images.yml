@@ -52,6 +52,22 @@ images:
         BASE_ARCH: arm64
         BASE_DISTRO: armbian
         BASE_IMAGE_RASPBIAN: "no"
+    armbian_debian_xcfe:
+      description: "Armbian Trixie w/ XCFE"
+      url: "https://dl.armbian.com/uefi-x86/Trixie_current_xfce"
+      checksum: "https://dl.armbian.com/uefi-x86/Trixie_current_xfce.sha"
+      type: http
+      os_name: debian
+      os_version: 13
+      distribution: trixie
+      port: armbian
+      env:
+        BASE_ARCH: x86_64
+        BASE_DISTRO: armbian
+        BASE_IMAGE_RASPBIAN: "no"
+        BASE_ADD_USER: "yes"
+        BASE_USER: "pi"
+        BASE_USER_PASSWORD: "armbian"
     raspbian_lepotato:
       description: "Le Potato AML-S905X-CC Raspbian image"
       type: libre.computer
