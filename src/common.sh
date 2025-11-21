@@ -9,7 +9,7 @@ function fixLd(){
     if [ -f etc/ld.so.preload ]; then
         sed -i 's@/usr/lib/arm-linux-gnueabihf/libcofi_rpi.so@\#/usr/lib/arm-linux-gnueabihf/libcofi_rpi.so@' etc/ld.so.preload
         sed -i 's@/usr/lib/arm-linux-gnueabihf/libarmmem.so@\#/usr/lib/arm-linux-gnueabihf/libarmmem.so@' etc/ld.so.preload
-  
+
         # Debian Buster/ Raspbian 2019-06-20
         sed -i 's@/usr/lib/arm-linux-gnueabihf/libarmmem-${PLATFORM}.so@#/usr/lib/arm-linux-gnueabihf/libarmmem-${PLATFORM}.so@' etc/ld.so.preload
    fi
@@ -19,7 +19,7 @@ function restoreLd(){
     if [ -f etc/ld.so.preload ]; then
         sed -i 's@\#/usr/lib/arm-linux-gnueabihf/libcofi_rpi.so@/usr/lib/arm-linux-gnueabihf/libcofi_rpi.so@' etc/ld.so.preload
         sed -i 's@\#/usr/lib/arm-linux-gnueabihf/libarmmem.so@/usr/lib/arm-linux-gnueabihf/libarmmem.so@' etc/ld.so.preload
-  
+
         # Debian Buster/ Raspbian 2019-06-20
         sed -i 's@#/usr/lib/arm-linux-gnueabihf/libarmmem-${PLATFORM}.so@/usr/lib/arm-linux-gnueabihf/libarmmem-${PLATFORM}.so@' etc/ld.so.preload
     fi
@@ -47,13 +47,13 @@ function gitclone(){
   # call like this: gitclone OCTOPI_OCTOPRINT_REPO someDirectory -- this will do:
   #
   #   sudo -u "${BASE_USER}" git clone -b $OCTOPI_OCTOPRINT_REPO_BRANCH --depth $OCTOPI_OCTOPRINT_REPO_DEPTH $OCTOPI_OCTOPRINT_REPO_BUILD someDirectory
-  # 
+  #
   # and if $OCTOPI_OCTOPRINT_REPO_BUILD != $OCTOPI_OCTOPRINT_REPO_SHIP also:
   #
   #   pushd someDirectory
   #     sudo -u "${BASE_USER}" git remote set-url origin $OCTOPI_OCTOPRINT_REPO_SHIP
   #   popd
-  # 
+  #
   # if second parameter is not provided last URL segment of the BUILD repo URL
   # minus the optional .git postfix will be used
 
@@ -84,13 +84,13 @@ function gitclone(){
   fi
 
   clone_params=
-  
+
   repo_recursive=${!repo_depth_var}
   if [ -n "$repo_recursive" ]
   then
     clone_params="--recursive"
   fi
-  
+
   if [ -n "$branch" ]
   then
     clone_params="-b $branch"
@@ -100,13 +100,13 @@ function gitclone(){
   then
     clone_params="$clone_params --depth $depth"
   fi
-  
+
   repo_dir=$2
   if [ ! -n "$repo_dir" ]
   then
     repo_dir=$(echo ${repo_dir} | sed 's%^.*/\([^/]*\)\(\.git\)?$%\1%g')
   fi
-  
+
   if [ "$repo_dir" == "" ]; then
       sudo -u "${BASE_USER}" git clone $clone_params "$build_repo"
   else
@@ -135,10 +135,10 @@ function unpack() {
   fi
   mkdir -p /tmp/unpack/
   # $from/. may look funny, but does exactly what we want, copy _contents_
-  # from $from to $to, but not $from itself, without the need to glob -- see 
+  # from $from to $to, but not $from itself, without the need to glob -- see
   # http://stackoverflow.com/a/4645159/2028598
   cp -v -r --preserve=mode,timestamps $from/. /tmp/unpack/
-  
+
   if [ -n "$owner" ]
   then
     chown -hR $owner:$owner /tmp/unpack/
@@ -172,7 +172,7 @@ function mount_image() {
   image_path=$1
   root_partition=$2
   mount_path=$3
-  
+
   boot_mount_path=boot
 
   if [ "$#" -gt 3 ]
@@ -195,7 +195,7 @@ function mount_image() {
   echo_green "Mounting image $image_path on $mount_path, offset for boot partition is $boot_offset, offset for root partition is $root_offset"
 
   # mount root and boot partition
-  
+
   detach_all_loopback $image_path
   echo_green "Mounting root partition"
   sudo losetup -f
@@ -233,7 +233,7 @@ function unmount_image() {
   fi
 
   # Unmount everything that is mounted
-  # 
+  #
   # We might have "broken" mounts in the mix that point at a deleted image (in case of some odd
   # build errors). So our "sudo mount" output can look like this:
   #
@@ -344,7 +344,7 @@ function shrink_ext() {
   image=$1
   partition=$2
   size=$3
-  
+
   echo_green "Resizing file system to $size MB..."
   start=$(sfdisk --json "${image}" | jq ".partitiontable.partitions[] | select(.node ==  \"$image$partition\").start")
   offset=$(($start*512))
@@ -355,7 +355,7 @@ function shrink_ext() {
   trap 'losetup -d $LODEV' EXIT
 
   e2fsck -fy $LODEV
-  
+
   e2ftarget_bytes=$(($size * 1024 * 1024))
   e2ftarget_blocks=$(($e2ftarget_bytes / 512 + 1))
 
@@ -404,7 +404,7 @@ function minimize_ext() {
 
   echo_green "Resizing partition $partition on $image to minimal size + $buffer MB"
   fdisk_output=$(sfdisk --json "${image_path}" )
-  
+
   start=$(jq ".partitiontable.partitions[] | select(.node == \"$image_path$partition\").start" <<< ${fdisk_output})
   e2fsize_blocks=$(jq ".partitiontable.partitions[] | select(.node == \"$image_path$partition\").size" <<< ${fdisk_output})
   offset=$(($start*512))
@@ -417,7 +417,7 @@ function minimize_ext() {
   if ( file -Ls $LODEV | grep -qi ext ); then
     e2fsck -fy $LODEV
     resize2fs -p $LODEV
-      
+
     e2fblocksize=$(tune2fs -l $LODEV | grep -i "block size" | awk -F: '{print $2-0}')
     e2fminsize=$(resize2fs -P $LODEV 2>/dev/null | grep -i "minimum size" | awk -F: '{print $2-0}')
 
@@ -430,13 +430,13 @@ function minimize_ext() {
     e2ftarget_mb=$(($e2ftarget_bytes / 1024 / 1024))
     e2ftarget_blocks=$(($e2ftarget_bytes / 512 + 1))
     e2fsize_mb=$(($e2fsize_bytes / 1024 / 1024))
-    
+
     size_offset_mb=$(($e2fsize_mb - $e2ftarget_mb))
-    
-    
+
+
     echo_green "Actual size is $e2fsize_mb MB ($e2fsize_blocks blocks), Minimum size is $e2fminsize_mb MB ($e2fminsize file system blocks, $e2fminsize_blocks blocks)"
     echo_green "Resizing to $e2ftarget_mb MB ($e2ftarget_blocks blocks)"
-    
+
     if [ $size_offset_mb -gt 0 ]; then
           echo_green "Partition size is bigger then the desired size, shrinking"
           shrink_ext $image $partition $(($e2ftarget_mb - 1)) # -1 to compensat rounding mistakes
@@ -497,7 +497,7 @@ function check_install_pkgs() {
     # if not in apt cache and not installed
     else
       echo_red "Missing Package ${dep} not found in Apt Repository. [SKIPPED]"
-    fi 
+    fi
   done
   # if missing pkgs install missing else skip that.
   if [ "${#missing_pkgs[@]}" -ne 0 ]; then
@@ -574,21 +574,21 @@ function load_module_config() {
       elif   [ -d "${CUSTOM_PI_OS_PATH}/modules/${module}" ]; then
           export MODULE_PATH="${CUSTOM_PI_OS_PATH}/modules/${module}"
       fi
-      
+
       echo "loading $module config at ${MODULE_PATH}/config"
       if [ -f "${MODULE_PATH}/config" ]; then
           source "${MODULE_PATH}/config"
       else
           echo "WARNING: module ${module} has no config file"
       fi
-      
+
       ###############################################################################
       # Print and export the final configuration.
 
       echo "================================================================"
       echo "Using the following config:"
       module_up=${module^^} module_up=${module_up//-/_}_
-      
+
       # Export variables that satisfy the $module_up prefix
       while IFS= read -r var; do export "$var"; echo "$var"; done < <(compgen -A variable "$module_up")
 
@@ -607,7 +607,7 @@ function chroot_correct_qemu() {
         echo "Error: Missing required arguments"
         echo "Usage: setup_qemu_chroot host_arch target_arch chroot_script custom_pi_os_path"
         return 1
-    fi 
+    fi
 
     # Copy required scripts
     cp "$chroot_script" chroot_script
@@ -652,6 +652,13 @@ function chroot_correct_qemu() {
                 chroot . usr/bin/qemu-aarch64 /bin/bash /chroot_script
             else
                 chroot . usr/bin/qemu-aarch64-static /bin/bash /chroot_script
+            fi
+        elif [[ "$target_arch" == "x86_64" ]]; then
+            echo "Building on non-ARM device a x86_64 system, using qemu-x86_64-static"
+            if grep -q gentoo /etc/os-release; then
+                chroot . usr/bin/qemu-x86_64 /bin/bash /chroot_script
+            else
+                chroot . usr/bin/qemu-x86_64-static /bin/bash /chroot_script
             fi
         else
             echo "Unknown arch, building on: $host_arch image: $target_arch"
